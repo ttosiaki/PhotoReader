@@ -5,11 +5,13 @@
 #   Photo Reader                                                             #
 # ----------------                                                           #
 #                                                                            #
-# Date:      Ver   Auther                                                    #
-# 2020/ 4/28 0.8   T.Toshiaki  Initial release                               #
+# Date       Ver  Auther                                                     #
+# ---------- ---- ---------- ----------------------------------------------- #
+# 2020/ 4/28 0.80 T.Toshiaki Initial release                                 #
+# 2020/ 5/ 1 0.81 T.Toshiaki 写真以外(Exifを含まない)もBackupできるよう修正    #
 #////////////////////////////////////////////////////////////////////////////#
 import tkinter as Tk
-from tkinter import filedialog as tkFileDialog #python3
+from tkinter import filedialog as tkFileDialog
 import os
 import shutil
 import glob
@@ -375,14 +377,19 @@ class PhotoFile:
     ##  Constructer  ##
     #---------------###
     def __init__( self, path ):
-
+        
         self.file_path = path
         self.file_name = os.path.basename( path )
         
         ## 画像ファイルからExifデータを取り出す
         #
-        image_obj = Image.open( path )
-        exif = image_obj._getexif()
+        try:
+            image_obj = Image.open( path )
+            exif = image_obj._getexif()
+        except OSError:
+            ## 画像ファイルでない場合、exifをNullにする
+            exif = None
+            
         ## Exifデータが存在しない場合、shoot_date に None を設定して終了
         if (exif == None):
             self.shoot_date = None
@@ -472,7 +479,6 @@ backupMan = BackupManager()
 configMan = ConfigManager()
 configMan.setup()
 
-buff = Tk.StringVar()
-buff.set('10')
-
+## Main Loop
+#
 frame.mainloop()
